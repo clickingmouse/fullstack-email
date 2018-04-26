@@ -16,31 +16,35 @@ passport.deserializeUser((id, done) => {
   });
 });
 
+//      callbackURL: 'http://localhost:5000/auth/google/callback'
+//https://protected-wave-29756.herokuapp.com
 passport.use(
   new GoogleStrategy(
     {
       clientID: keys.googleClientID,
       clientSecret: keys.googleClientSecret,
-      callbackURL: 'http://localhost:5000/auth/google/callback'
+      //      callbackURL: 'http://localhost:5000/auth/google/callback',
+      callbackURL: '/auth/google/callback',
+      proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
+    //    (accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, profile, done) => {
       //console.log('accessToken:: ', accessToken);
       //console.log('refreshToken:: ', refreshToken);
       //console.log('profile:: ', profile);
 
-      User.findOne({ googleId: profile.id }).then(existingUser => {
-        if (existingUser) {
-          //already have record
-          done(null, existingUser);
-        } else {
-          // make a new record
-          new User({ googleId: profile.id })
-            .save()
-            .then(user => done(null, user));
-
-          //done();
-        }
-      });
+      const existingUser = await User.findOne({ googleId: profile.id });
+      //.then(existingUser => {
+      if (existingUser) {
+        //already have record
+        done(null, existingUser);
+      } else {
+        // make a new record
+        const user = await new User({ googleId: profile.id }).save();
+        //.then(user =>
+        done(null, user); //);
+      }
+      //});
     }
   )
 );
