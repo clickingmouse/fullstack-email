@@ -30,6 +30,18 @@ mongoose.connect(keys.mongoURI);
 require('./routes/authRoutes')(app);
 require('./routes/billingRoutes')(app);
 
+//for production
+if (process.env.NODE_ENV === 'production') {
+  //Express will serve up production assest like main.js or main.csss file
+  app.use(express.static('client/build'));
+
+  //Express will serve up index.html file if it does recognize the route
+  const path = require('path');
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirnanme, 'client', 'build', 'index.html'));
+  });
+}
+
 /*
 app.get('/', (req, res) => {
   res.send({ hi: 'there!' });
